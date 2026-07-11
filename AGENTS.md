@@ -6,7 +6,7 @@
 
 ## What is Echo?
 
-Echo is an open-source, voice-first AI transcription web application built with Next.js. Instead of typing prompts, users speak — Echo transcribes their speech using open-source Whisper models and saves the results to a local SQLite3 database.
+Echo is an open-source, voice-first AI transcription web application built with Next.js. Instead of typing prompts, users speak — Echo transcribes their speech using Whisper models hosted on Groq and saves the results to a local SQLite3 database.
 
 ---
 
@@ -19,7 +19,7 @@ Echo is an open-source, voice-first AI transcription web application built with 
 | Styling | Tailwind CSS |
 | Database | SQLite3 (via `better-sqlite3`) |
 | Auth | Custom JWT + bcrypt (no third-party providers) |
-| Speech-to-Text | Whisper Large V3 / faster-whisper |
+| Speech-to-Text | Groq API (whisper-large-v3 / whisper-large-v3-turbo) |
 | Package Manager | npm |
 
 ---
@@ -41,7 +41,7 @@ echo/
 │   │   ├── favorites/
 │   │   │   └── page.tsx          # Favorited transcriptions only
 │   │   └── settings/
-│   │       └── page.tsx          # API keys + account settings
+│   │       └── page.tsx          # Groq API key + model selection + account settings
 │   └── api/
 │       ├── auth/
 │       │   ├── signup/
@@ -49,7 +49,7 @@ echo/
 │       │   └── login/
 │       │       └── route.ts      # POST /api/auth/login
 │       ├── transcribe/
-│       │   └── route.ts          # POST /api/transcribe — sends audio to STT provider
+│       │   └── route.ts          # POST /api/transcribe — sends audio to Groq API
 │       └── recordings/
 │           └── route.ts          # GET/DELETE /api/recordings — manage saved transcripts
 ├── components/
@@ -76,12 +76,12 @@ The database uses **SQLite3** via `better-sqlite3`. The `echo.db` file lives at 
 ### `users`
 ```sql
 CREATE TABLE IF NOT EXISTS users (
-  id           INTEGER PRIMARY KEY AUTOINCREMENT,
-  first_name   TEXT NOT NULL,
-  last_name    TEXT NOT NULL,
-  email        TEXT UNIQUE NOT NULL,
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  first_name    TEXT NOT NULL,
+  last_name     TEXT NOT NULL,
+  email         TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
-  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS recordings (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   text        TEXT NOT NULL,
-  provider    TEXT,               -- 'whisper' or 'faster-whisper'
+  model       TEXT,               -- 'whisper-large-v3' or 'whisper-large-v3-turbo'
   duration    REAL,               -- audio duration in seconds
   is_favorite INTEGER DEFAULT 0, -- 0 = false, 1 = true
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -101,12 +101,11 @@ CREATE TABLE IF NOT EXISTS recordings (
 ### `user_settings`
 ```sql
 CREATE TABLE IF NOT EXISTS user_settings (
-  id                      INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id                 INTEGER UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  whisper_api_key         TEXT,
-  faster_whisper_api_key  TEXT,
-  default_provider        TEXT DEFAULT 'whisper',
-  updated_at              DATETIME DEFAULT CURRENT_TIMESTAMP
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id       INTEGER UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  groq_api_key  TEXT,           -- user's personal Groq API key (free at console.groq.com)
+  default_model TEXT DEFAULT 'whisper-large-v3-turbo', -- preferred Groq Whisper model
+  updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
@@ -134,26 +133,61 @@ DATABASE_PATH=./echo.db
 
 Never expose `JWT_SECRET`. Never commit `.env.local` to git.
 
+> Note: There is NO global API key in `.env.local`. Each user supplies their own Groq API key via the Settings page. It is stored in the database and used server-side only.
+
 ---
 
 ## AI Provider Integration
 
-Users store their own API keys in the Settings page. Keys are saved to `user_settings` in the database. API keys are used server-side only — never exposed to the browser.
+Echo uses the **Groq API** for speech-to-text transcription. Groq hosts Whisper models on its own infrastructure, so no GPU or local model setup is required. The Groq API is completely free — users sign up at [console.groq.com](https://console.groq.com) to get their own free API key, then paste it into Echo's Settings page.
 
-### Supported Providers
+### Supported Models
 
-| Provider | Key in DB | Notes |
+| Model | Groq Model String | Best For |
 |---|---|---|
-| Whisper Large V3 | `whisper_api_key` | Compatible with OpenAI audio API format |
-| faster-whisper | `faster_whisper_api_key` | Self-hosted or cloud endpoint |
+| Whisper Large V3 | `whisper-large-v3` | Maximum accuracy, 90+ languages |
+| Whisper Large V3 Turbo | `whisper-large-v3-turbo` | Faster inference, slightly lighter (recommended default) |
+
+### Groq Free Tier Limits
+- 2,000 requests per day
+- 7,200 audio seconds per hour
+- No credit card required
+- Sign up at: https://console.groq.com
+
+### Groq API Endpoint
+```
+POST https://api.groq.com/openai/v1/audio/transcriptions
+```
+
+The Groq audio API is **OpenAI-compatible**. Send audio as `multipart/form-data`.
+
+### Example API Call (inside `/api/transcribe/route.ts`)
+```typescript
+const formData = new FormData();
+formData.append("file", audioBlob, "recording.webm");
+formData.append("model", userSettings.default_model); // 'whisper-large-v3' or 'whisper-large-v3-turbo'
+formData.append("response_format", "json");
+
+const response = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${userSettings.groq_api_key}`,
+  },
+  body: formData,
+});
+
+const data = await response.json();
+const transcript = data.text;
+```
 
 ### Transcription Flow (`/api/transcribe`)
-1. Receive audio file from the browser (FormData, multipart)
+1. Receive audio file from the browser (`FormData`, multipart)
 2. Read the user's JWT from cookie → get `user_id`
-3. Fetch user's API key + preferred provider from `user_settings`
-4. Forward audio to the selected STT provider
-5. Save transcription result to `recordings` table
-6. Return transcribed text to the client
+3. Fetch user's `groq_api_key` and `default_model` from `user_settings`
+4. If no API key is set, return `400` with a message prompting the user to add their key in Settings
+5. Forward audio to `https://api.groq.com/openai/v1/audio/transcriptions`
+6. Save transcription result + model used to the `recordings` table
+7. Return transcribed text to the client
 
 ---
 
@@ -166,7 +200,7 @@ Users store their own API keys in the Settings page. Keys are saved to `user_set
 | `/dashboard` | Main transcription page with mic button and transcript card |
 | `/dashboard/history` | All recordings, sorted by date, with search |
 | `/dashboard/favorites` | Only recordings where `is_favorite = 1` |
-| `/dashboard/settings` | API key management + account settings |
+| `/dashboard/settings` | Groq API key input, model selector, account settings |
 
 ---
 
@@ -181,7 +215,7 @@ Users store their own API keys in the Settings page. Keys are saved to `user_set
 ### `TranscriptCard.tsx`
 - Displays the transcribed text
 - Copy button (copies text to clipboard)
-- Delete button (calls DELETE `/api/recordings/:id`)
+- Delete button (calls `DELETE /api/recordings/:id`)
 - Character count + timestamp
 - Favorite toggle button
 
@@ -200,20 +234,21 @@ Users store their own API keys in the Settings page. Keys are saved to `user_set
 - Auth helpers (sign token, verify token, hash password, compare password) go through `lib/auth.ts`
 - Use **Tailwind CSS** for all styling — no inline styles, no CSS modules unless needed
 - Keep components small and focused — one responsibility per component
-- Handle errors in API routes with proper HTTP status codes (400, 401, 404, 500)
+- Handle errors in API routes with proper HTTP status codes (`400`, `401`, `404`, `500`)
 - Always validate request body in API routes before touching the database
 
 ---
 
 ## What NOT to do
 
-- Do **not** store API keys in environment variables — they are per-user and stored in the database
-- Do **not** expose API keys to the browser — all provider calls happen server-side in API routes
+- Do **not** store a global Groq API key in `.env.local` — keys are per-user and stored in the database
+- Do **not** expose the user's Groq API key to the browser — all Groq calls happen server-side in `/api/transcribe`
 - Do **not** use an external database (Postgres, MySQL, etc.) — this project uses SQLite3 only
 - Do **not** use NextAuth or any third-party auth library — auth is custom JWT + bcrypt
 - Do **not** use `localStorage` for sensitive data like tokens — use HTTP-only cookies only
 - Do **not** create new pages outside the `app/` directory structure
 - Do **not** commit `echo.db` or `.env.local` to git
+- Do **not** add a second STT provider — Groq is the only provider. The user only chooses between the two Groq Whisper models (`whisper-large-v3` and `whisper-large-v3-turbo`)
 
 ---
 
