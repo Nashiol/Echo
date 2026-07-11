@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const navLinks = [
   { href: "/dashboard", label: "New Recording", icon: "mic" },
@@ -10,8 +11,28 @@ const navLinks = [
   { href: "/dashboard/settings", label: "Settings", icon: "settings" },
 ];
 
+interface UserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 export default function Sidebar() {
   const pathname = usePathname();
+  const [user, setUser] = useState<UserData | null>(null);
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user) setUser(data.user);
+      })
+      .catch(() => {});
+  }, []);
+
+  const initials = user
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    : null;
 
   return (
     <nav className="hidden md:flex w-[280px] h-screen fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex-col py-6 px-4 z-50">
@@ -55,13 +76,29 @@ export default function Sidebar() {
       </ul>
 
       <div className="mt-auto pt-6 border-t border-outline-variant">
-        <Link
-          href="/login"
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-primary text-sm font-semibold"
-        >
-          <span className="material-symbols-outlined text-[18px]">login</span>
-          Log In
-        </Link>
+        {user ? (
+          <div className="flex items-center gap-3 px-2">
+            <div className="w-9 h-9 rounded-full bg-secondary/10 text-secondary flex items-center justify-center text-sm font-bold">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-primary truncate">
+                {user.firstName} {user.lastName}
+              </p>
+              <p className="text-xs text-on-surface-variant truncate">
+                Free Plan
+              </p>
+            </div>
+          </div>
+        ) : (
+          <Link
+            href="/login"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-primary text-sm font-semibold"
+          >
+            <span className="material-symbols-outlined text-[18px]">login</span>
+            Log In
+          </Link>
+        )}
       </div>
     </nav>
   );
