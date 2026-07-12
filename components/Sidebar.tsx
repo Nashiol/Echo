@@ -52,7 +52,7 @@ export default function Sidebar() {
       {/* Hamburger toggle button — always visible */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-[60] w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-low border border-outline-variant text-primary hover:bg-surface-container-high transition-colors cursor-pointer"
+        className="fixed top-4 left-4 z-60 w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-low border border-outline-variant text-primary hover:bg-surface-container-high transition-colors cursor-pointer"
         aria-label="Toggle menu"
       >
         {isOpen ? <X size={18} /> : <Menu size={18} />}
@@ -61,14 +61,14 @@ export default function Sidebar() {
       {/* Backdrop overlay */}
       <div
         onClick={close}
-        className={`fixed inset-0 bg-black/30 z-[55] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/30 z-55 transition-opacity duration-300 ${
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       />
 
       {/* Sidebar panel */}
       <nav
-        className={`fixed left-0 top-0 h-screen w-[240px] bg-surface-container-low border-r border-outline-variant flex-col py-4 px-3 z-[60] transition-transform duration-300 ease-in-out ${
+        className={`fixed left-0 top-0 h-screen w-60 bg-surface-container-low border-r border-outline-variant flex-col py-4 px-3 z-60 transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -121,9 +121,6 @@ export default function Sidebar() {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-primary truncate">
                   {user.firstName} {user.lastName}
-                </p>
-                <p className="text-[10px] text-on-surface-variant truncate">
-                  Free Plan
                 </p>
               </div>
             </div>
