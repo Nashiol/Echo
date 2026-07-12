@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Mic, Clock, Star, Settings } from "lucide-react";
 
 const navLinks = [
-  { href: "/dashboard", label: "Record", icon: "mic" },
-  { href: "/dashboard/history", label: "History", icon: "history" },
-  { href: "/dashboard/favorites", label: "Saved", icon: "star" },
-  { href: "/dashboard/settings", label: "Settings", icon: "settings" },
+  { href: "/dashboard", label: "Record", icon: Mic },
+  { href: "/dashboard/history", label: "History", icon: Clock },
+  { href: "/dashboard/favorites", label: "Saved", icon: Star },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 export default function BottomNav() {
@@ -21,7 +22,8 @@ export default function BottomNav() {
             ? pathname === "/dashboard"
             : pathname.startsWith(link.href);
 
-        const isRecord = link.icon === "mic";
+        const isRecord = link.icon === Mic;
+        const Icon = link.icon;
 
         return (
           <Link
@@ -35,17 +37,8 @@ export default function BottomNav() {
                   : "text-on-surface-variant hover:bg-surface-container-high rounded-full"
             }`}
           >
-            <span
-              className="material-symbols-outlined"
-              style={
-                isActive && !isRecord
-                  ? { fontVariationSettings: "'FILL' 1" }
-                  : undefined
-              }
-            >
-              {link.icon}
-            </span>
-            <span className="text-[11px] font-semibold tracking-wide mt-1 uppercase">
+            <Icon size={20} />
+            <span className="text-[10px] font-semibold tracking-wide mt-1 uppercase">
               {link.label}
             </span>
           </Link>

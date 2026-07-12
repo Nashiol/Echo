@@ -21,7 +21,7 @@ export default function ModelSelector({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      className="w-full bg-surface border border-outline-variant rounded-lg px-4 py-3 text-sm text-on-surface appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-colors disabled:opacity-50"
+      className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-colors disabled:opacity-50"
     >
       {MODELS.map((model) => (
         <option key={model.value} value={model.value}>

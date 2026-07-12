@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Copy, Check, X } from "lucide-react";
 import MicButton from "@/components/MicButton";
 import ModelSelector from "@/components/ModelSelector";
 
@@ -100,12 +101,12 @@ export default function DashboardPage() {
 
   return (
     <>
-      <section className="flex flex-col items-center justify-center pt-10 md:pt-0 pb-6 gap-4">
-        <div className="w-full max-w-xs mb-2">
+      <section className="flex flex-col items-center justify-center pt-6 md:pt-0 pb-4 gap-3">
+        <div className="w-full max-w-xs mb-1">
           <ModelSelector value={model} onChange={setModel} disabled={micState !== "idle"} />
         </div>
 
-        <p className="text-lg text-on-surface-variant">
+        <p className="text-sm text-on-surface-variant">
           {micState === "idle"
             ? "Tap the mic to start recording"
             : micState === "listening"
@@ -116,20 +117,20 @@ export default function DashboardPage() {
         <MicButton state={micState} onClick={handleClick} />
 
         {error && (
-          <p className="text-sm text-red-500 mt-2 text-center max-w-sm">{error}</p>
+          <p className="text-xs text-red-500 mt-1 text-center max-w-sm">{error}</p>
         )}
       </section>
 
-      <section className="bg-surface border border-outline-variant rounded-3xl p-6 flex flex-col gap-4 transition-colors hover:border-secondary shadow-sm">
-        <div className="flex justify-between items-center border-b border-outline-variant pb-4">
-          <div className="flex items-center gap-3">
+      <section className="bg-surface border border-outline-variant rounded-2xl p-4 flex flex-col gap-3 transition-colors hover:border-secondary shadow-sm">
+        <div className="flex justify-between items-center border-b border-outline-variant pb-3">
+          <div className="flex items-center gap-2">
             {micState === "listening" && (
-              <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="flex h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
             )}
             {micState === "processing" && (
-              <span className="flex h-2 w-2 rounded-full bg-secondary animate-pulse" />
+              <span className="flex h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
             )}
-            <h2 className="text-lg font-semibold text-primary">
+            <h2 className="text-sm font-semibold text-primary">
               {micState === "idle" && transcript
                 ? "Transcription Complete"
                 : micState === "listening"
@@ -139,12 +140,12 @@ export default function DashboardPage() {
                     : "Current Recording"}
             </h2>
           </div>
-          <span className="text-[13px] font-mono text-on-surface-variant bg-surface-container px-2 py-1 rounded">
+          <span className="text-[11px] font-mono text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded">
             {transcript ? `${transcript.length} chars` : "00:00"}
           </span>
         </div>
 
-        <div className="min-h-[150px] text-base text-on-surface leading-relaxed">
+        <div className="min-h-[100px] text-sm text-on-surface leading-relaxed">
           {transcript ? (
             <p className="whitespace-pre-wrap">{transcript}</p>
           ) : (
@@ -154,30 +155,26 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="flex justify-between items-center pt-4 mt-auto border-t border-outline-variant/50">
-          <div className="flex gap-3">
+        <div className="flex justify-between items-center pt-3 mt-auto border-t border-outline-variant/50">
+          <div className="flex gap-2">
             <button
               onClick={handleCopy}
               disabled={!transcript}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-primary text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-primary text-xs disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <span className="material-symbols-outlined text-[18px]">
-                {copied ? "check" : "content_copy"}
-              </span>
+              {copied ? <Check size={14} /> : <Copy size={14} />}
               {copied ? "Copied" : "Copy"}
             </button>
             <button
               onClick={handleClear}
               disabled={!transcript && micState === "idle"}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-error-container hover:text-on-error-container transition-colors text-on-surface-variant text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-error-container hover:text-on-error-container transition-colors text-on-surface-variant text-xs disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <span className="material-symbols-outlined text-[18px]">
-                clear_all
-              </span>
+              <X size={14} />
               Clear
             </button>
           </div>
-          <span className="text-[13px] font-mono text-on-surface-variant">
+          <span className="text-[11px] font-mono text-on-surface-variant">
             {transcript.length} chars
           </span>
         </div>

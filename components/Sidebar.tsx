@@ -3,12 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  Mic,
+  Clock,
+  Star,
+  Settings,
+  LogIn,
+  AudioLines,
+} from "lucide-react";
 
 const navLinks = [
-  { href: "/dashboard", label: "New Recording", icon: "mic" },
-  { href: "/dashboard/history", label: "History", icon: "history" },
-  { href: "/dashboard/favorites", label: "Favorites", icon: "star" },
-  { href: "/dashboard/settings", label: "Settings", icon: "settings" },
+  { href: "/dashboard", label: "New Recording", icon: Mic },
+  { href: "/dashboard/history", label: "History", icon: Clock },
+  { href: "/dashboard/favorites", label: "Favorites", icon: Star },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 interface UserData {
@@ -35,57 +43,57 @@ export default function Sidebar() {
     : null;
 
   return (
-    <nav className="hidden md:flex w-[280px] h-screen fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex-col py-6 px-4 z-50">
-      <div className="flex items-center gap-4 mb-10 px-2">
-        <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center border border-outline-variant">
-          <span className="material-symbols-outlined text-primary">
-            graphic_eq
-          </span>
+    <nav className="hidden md:flex w-[240px] h-screen fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex-col py-4 px-3 z-50">
+      <div className="flex items-center gap-3 mb-6 px-1">
+        <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center border border-outline-variant">
+          <AudioLines size={16} className="text-primary" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-primary tracking-tight">
+          <h1 className="text-lg font-bold text-primary tracking-tight">
             Echo
           </h1>
-          <p className="text-sm text-on-surface-variant">AI Transcription</p>
+          <p className="text-[11px] text-on-surface-variant">AI Transcription</p>
         </div>
       </div>
 
-      <ul className="flex-1 space-y-2">
+      <ul className="flex-1 space-y-1">
         {navLinks.map((link) => {
           const isActive =
             link.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname.startsWith(link.href);
 
+          const Icon = link.icon;
+
           return (
             <li key={link.href}>
               <Link
                 href={link.href}
-                className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                   isActive
                     ? "text-primary font-bold bg-surface-container-highest border-r-2 border-secondary"
                     : "text-on-surface-variant hover:bg-surface-container-highest"
                 }`}
               >
-                <span className="material-symbols-outlined">{link.icon}</span>
-                <span className="text-base">{link.label}</span>
+                <Icon size={18} />
+                <span className="text-sm">{link.label}</span>
               </Link>
             </li>
           );
         })}
       </ul>
 
-      <div className="mt-auto pt-6 border-t border-outline-variant">
+      <div className="mt-auto pt-4 border-t border-outline-variant">
         {user ? (
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-9 h-9 rounded-full bg-secondary/10 text-secondary flex items-center justify-center text-sm font-bold">
+          <div className="flex items-center gap-2.5 px-1">
+            <div className="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center text-xs font-bold">
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-primary truncate">
+              <p className="text-xs font-semibold text-primary truncate">
                 {user.firstName} {user.lastName}
               </p>
-              <p className="text-xs text-on-surface-variant truncate">
+              <p className="text-[10px] text-on-surface-variant truncate">
                 Free Plan
               </p>
             </div>
@@ -93,9 +101,9 @@ export default function Sidebar() {
         ) : (
           <Link
             href="/login"
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-primary text-sm font-semibold"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-primary text-xs font-semibold"
           >
-            <span className="material-symbols-outlined text-[18px]">login</span>
+            <LogIn size={16} />
             Log In
           </Link>
         )}

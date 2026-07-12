@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Loader2, Star } from "lucide-react";
 import TranscriptCard from "@/components/TranscriptCard";
 
 interface Recording {
@@ -46,33 +47,29 @@ export default function FavoritesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <span className="material-symbols-outlined text-secondary animate-spin text-3xl">
-          progress_activity
-        </span>
+        <Loader2 size={24} className="animate-spin text-secondary" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-on-surface">Favorites</h2>
-        <p className="text-on-surface-variant text-sm mt-1">
+        <h2 className="text-xl font-bold text-on-surface">Favorites</h2>
+        <p className="text-on-surface-variant text-xs mt-1">
           Your starred transcriptions.
         </p>
       </div>
 
       {recordings.length === 0 ? (
         <div className="text-center py-16">
-          <span className="material-symbols-outlined text-6xl text-on-surface-variant/30 mb-4 block">
-            star
-          </span>
-          <p className="text-on-surface-variant text-sm">
+          <Star size={48} className="mx-auto text-on-surface-variant/30 mb-3" />
+          <p className="text-on-surface-variant text-xs">
             No favorites yet. Star a recording from History.
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {recordings.map((rec) => (
             <TranscriptCard
               key={rec.id}

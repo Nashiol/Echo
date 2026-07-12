@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function SettingsPage() {
   const [apiKey, setApiKey] = useState("");
@@ -51,28 +52,26 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <span className="material-symbols-outlined text-secondary animate-spin text-3xl">
-          progress_activity
-        </span>
+        <Loader2 size={24} className="animate-spin text-secondary" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-on-surface">Settings</h2>
-        <p className="text-on-surface-variant text-sm mt-1">
+        <h2 className="text-xl font-bold text-on-surface">Settings</h2>
+        <p className="text-on-surface-variant text-xs mt-1">
           Configure your Groq API key and transcription preferences.
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-outline-variant p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-outline-variant p-4 space-y-5">
         <div>
-          <h3 className="text-sm font-semibold text-on-surface mb-1">
+          <h3 className="text-xs font-semibold text-on-surface mb-1">
             Groq API Key
           </h3>
-          <p className="text-xs text-on-surface-variant mb-3">
+          <p className="text-[11px] text-on-surface-variant mb-2">
             Get your free API key at{" "}
             <a
               href="https://console.groq.com"
@@ -88,20 +87,20 @@ export default function SettingsPage() {
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="gsk_..."
-            className="w-full bg-surface border border-outline-variant rounded-lg px-4 py-3 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-colors"
+            className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-colors"
           />
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-on-surface mb-1">
+          <h3 className="text-xs font-semibold text-on-surface mb-1">
             Default Model
           </h3>
-          <p className="text-xs text-on-surface-variant mb-3">
+          <p className="text-[11px] text-on-surface-variant mb-2">
             Choose the Whisper model for transcription.
           </p>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <label
-              className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+              className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                 model === "whisper-large-v3-turbo"
                   ? "border-secondary bg-secondary/5"
                   : "border-outline-variant hover:bg-surface"
@@ -116,28 +115,28 @@ export default function SettingsPage() {
                 className="sr-only"
               />
               <div
-                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
                   model === "whisper-large-v3-turbo"
                     ? "border-secondary"
                     : "border-outline-variant"
                 }`}
               >
                 {model === "whisper-large-v3-turbo" && (
-                  <div className="w-2 h-2 rounded-full bg-secondary" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-on-surface">
+                <p className="text-xs font-medium text-on-surface">
                   Whisper V3 Turbo
                 </p>
-                <p className="text-xs text-on-surface-variant">
+                <p className="text-[11px] text-on-surface-variant">
                   Faster inference — recommended for most use cases
                 </p>
               </div>
             </label>
 
             <label
-              className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+              className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                 model === "whisper-large-v3"
                   ? "border-secondary bg-secondary/5"
                   : "border-outline-variant hover:bg-surface"
@@ -152,21 +151,21 @@ export default function SettingsPage() {
                 className="sr-only"
               />
               <div
-                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
                   model === "whisper-large-v3"
                     ? "border-secondary"
                     : "border-outline-variant"
                 }`}
               >
                 {model === "whisper-large-v3" && (
-                  <div className="w-2 h-2 rounded-full bg-secondary" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-on-surface">
+                <p className="text-xs font-medium text-on-surface">
                   Whisper V3
                 </p>
-                <p className="text-xs text-on-surface-variant">
+                <p className="text-[11px] text-on-surface-variant">
                   Maximum accuracy, supports 90+ languages
                 </p>
               </div>
@@ -176,7 +175,7 @@ export default function SettingsPage() {
 
         {message && (
           <div
-            className={`px-4 py-3 rounded-lg text-sm font-medium ${
+            className={`px-3 py-2 rounded-lg text-xs font-medium ${
               message.type === "success"
                 ? "bg-green-50 text-green-700"
                 : "bg-red-50 text-red-700"
@@ -189,7 +188,7 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="w-full bg-secondary text-white rounded-lg py-3 text-sm font-semibold hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full bg-secondary text-white rounded-lg py-2.5 text-xs font-semibold hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {saving ? "Saving..." : "Save Settings"}
         </button>
