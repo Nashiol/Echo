@@ -121,7 +121,7 @@ export default function DashboardPage() {
         )}
       </section>
 
-      <section className="bg-surface border border-outline-variant rounded-2xl p-4 flex flex-col gap-3 transition-colors hover:border-secondary shadow-sm">
+      <section className="max-w-2xl mx-auto w-full bg-surface border border-outline-variant rounded-2xl p-4 flex flex-col gap-3 transition-colors hover:border-secondary shadow-sm">
         <div className="flex justify-between items-center border-b border-outline-variant pb-3">
           <div className="flex items-center gap-2">
             {micState === "listening" && (
