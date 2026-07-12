@@ -32,8 +32,16 @@ db.exec(`
     user_id       INTEGER UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     groq_api_key  TEXT,
     default_model TEXT DEFAULT 'whisper-large-v3-turbo',
+    language      TEXT DEFAULT 'en',
     updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
+
+// Migration: add language column if missing (for existing databases)
+try {
+  db.prepare("SELECT language FROM user_settings LIMIT 1").get();
+} catch {
+  db.prepare("ALTER TABLE user_settings ADD COLUMN language TEXT DEFAULT 'en'").run();
+}
 
 export default db;

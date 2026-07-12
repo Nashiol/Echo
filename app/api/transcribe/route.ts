@@ -6,6 +6,7 @@ import db from "@/lib/db";
 interface UserSettings {
   groq_api_key: string | null;
   default_model: string;
+  language: string;
 }
 
 export async function POST(request: Request) {
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     const settings = db
-      .prepare("SELECT groq_api_key, default_model FROM user_settings WHERE user_id = ?")
+      .prepare("SELECT groq_api_key, default_model, language FROM user_settings WHERE user_id = ?")
       .get(payload.userId) as UserSettings | undefined;
 
     if (!settings?.groq_api_key) {
@@ -51,6 +52,11 @@ export async function POST(request: Request) {
     groqFormData.append("file", audioFile, "recording.webm");
     groqFormData.append("model", model);
     groqFormData.append("response_format", "json");
+
+    const language = settings.language || "en";
+    if (language !== "auto") {
+      groqFormData.append("language", language);
+    }
 
     const response = await fetch(
       "https://api.groq.com/openai/v1/audio/transcriptions",

@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 export default function SettingsPage() {
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("whisper-large-v3-turbo");
+  const [language, setLanguage] = useState("en");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,6 +17,7 @@ export default function SettingsPage() {
       .then((data) => {
         setApiKey(data.groqApiKey || "");
         setModel(data.defaultModel || "whisper-large-v3-turbo");
+        setLanguage(data.language || "en");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -33,7 +35,7 @@ export default function SettingsPage() {
       const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ groqApiKey: apiKey, defaultModel: model }),
+        body: JSON.stringify({ groqApiKey: apiKey, defaultModel: model, language }),
       });
 
       if (res.ok) {
@@ -171,6 +173,42 @@ export default function SettingsPage() {
               </div>
             </label>
           </div>
+        </div>
+
+        <div>
+          <h3 className="text-xs font-semibold text-on-surface mb-1">
+            Transcription Language
+          </h3>
+          <p className="text-[11px] text-on-surface-variant mb-2">
+            Set the language for accurate transcription. Use Auto if you speak multiple languages.
+          </p>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-colors cursor-pointer"
+          >
+            <option value="auto">Auto-detect</option>
+            <option value="en">English</option>
+            <option value="sw">Swahili</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="pt">Portuguese</option>
+            <option value="de">German</option>
+            <option value="it">Italian</option>
+            <option value="nl">Dutch</option>
+            <option value="ru">Russian</option>
+            <option value="tr">Turkish</option>
+            <option value="pl">Polish</option>
+            <option value="sv">Swedish</option>
+            <option value="da">Danish</option>
+            <option value="no">Norwegian</option>
+            <option value="fi">Finnish</option>
+            <option value="ja">Japanese</option>
+            <option value="zh">Chinese</option>
+            <option value="ko">Korean</option>
+            <option value="ar">Arabic</option>
+            <option value="hi">Hindi</option>
+          </select>
         </div>
 
         {message && (

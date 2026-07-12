@@ -18,15 +18,17 @@ export async function GET() {
     }
 
     const settings = db
-      .prepare("SELECT groq_api_key, default_model FROM user_settings WHERE user_id = ?")
+      .prepare("SELECT groq_api_key, default_model, language FROM user_settings WHERE user_id = ?")
       .get(payload.userId) as {
       groq_api_key: string | null;
       default_model: string;
+      language: string;
     } | undefined;
 
     return NextResponse.json({
       groqApiKey: settings?.groq_api_key || "",
       defaultModel: settings?.default_model || "whisper-large-v3-turbo",
+      language: settings?.language || "en",
     });
   } catch {
     return NextResponse.json(
@@ -51,7 +53,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { groqApiKey, defaultModel } = body;
+    const { groqApiKey, defaultModel, language } = body;
 
     if (!groqApiKey || !groqApiKey.trim()) {
       return NextResponse.json(
@@ -65,9 +67,15 @@ export async function PUT(request: Request) {
       ? defaultModel
       : "whisper-large-v3-turbo";
 
+    const validLanguages = [
+      "auto", "en", "sw", "es", "fr", "pt", "de", "ja", "zh", "ar",
+      "hi", "ko", "it", "nl", "ru", "tr", "pl", "sv", "da", "no", "fi",
+    ];
+    const lang = validLanguages.includes(language) ? language : "en";
+
     db.prepare(
-      "UPDATE user_settings SET groq_api_key = ?, default_model = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?"
-    ).run(groqApiKey.trim(), model, payload.userId);
+      "UPDATE user_settings SET groq_api_key = ?, default_model = ?, language = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?"
+    ).run(groqApiKey.trim(), model, lang, payload.userId);
 
     return NextResponse.json({ message: "Settings saved" });
   } catch {

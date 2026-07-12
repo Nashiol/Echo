@@ -10,6 +10,7 @@ type MicState = "idle" | "listening" | "processing";
 export default function DashboardPage() {
   const [micState, setMicState] = useState<MicState>("idle");
   const [model, setModel] = useState("whisper-large-v3-turbo");
+  const [language, setLanguage] = useState("en");
   const [transcript, setTranscript] = useState("");
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +23,7 @@ export default function DashboardPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.defaultModel) setModel(data.defaultModel);
+        if (data.language) setLanguage(data.language);
       })
       .catch(() => {});
   }, []);
@@ -104,6 +106,9 @@ export default function DashboardPage() {
       <section className="flex flex-col items-center justify-center pt-6 md:pt-0 pb-4 gap-3">
         <div className="w-full max-w-xs mb-1">
           <ModelSelector value={model} onChange={setModel} disabled={micState !== "idle"} />
+          <p className="text-[10px] text-on-surface-variant text-center mt-1">
+            Language: {language === "auto" ? "Auto-detect" : language.toUpperCase()}
+          </p>
         </div>
 
         <p className="text-sm text-on-surface-variant">
