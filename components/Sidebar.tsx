@@ -9,6 +9,7 @@ import {
   Star,
   Settings,
   LogIn,
+  LogOut,
   AudioLines,
   Menu,
   X,
@@ -42,6 +43,11 @@ export default function Sidebar() {
   }, []);
 
   const close = useCallback(() => setIsOpen(false), []);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/login";
+  };
 
   const initials = user
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
@@ -123,6 +129,13 @@ export default function Sidebar() {
                   {user.firstName} {user.lastName}
                 </p>
               </div>
+              <button
+                onClick={handleLogout}
+                className="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-highest hover:text-red-500 transition-colors cursor-pointer"
+                aria-label="Log out"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
           ) : (
             <Link
