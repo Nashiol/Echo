@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+.env*
+echo.db
+echo.db-shm
+echo.db-wal
+*.tsbuildinfo
+next-env.d.ts
+README.md
