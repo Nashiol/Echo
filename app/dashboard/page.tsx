@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Copy, Check, X } from "lucide-react";
+import { Copy, Check, X, Pencil } from "lucide-react";
 import MicButton from "@/components/MicButton";
 import ModelSelector from "@/components/ModelSelector";
 
@@ -12,6 +12,10 @@ export default function DashboardPage() {
   const [model, setModel] = useState("whisper-large-v3-turbo");
   const [language, setLanguage] = useState("en");
   const [transcript, setTranscript] = useState("");
+  const [recordingId, setRecordingId] = useState<number | null>(null);
+  const [originalText, setOriginalText] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -73,6 +77,7 @@ export default function DashboardPage() {
             setError(data.error || "Transcription failed.");
           } else {
             setTranscript(data.text);
+            setRecordingId(data.id);
           }
         } catch {
           setError("Network error. Please try again.");
@@ -99,6 +104,40 @@ export default function DashboardPage() {
   const handleClear = () => {
     setTranscript("");
     setError(null);
+    setIsEditing(false);
+    setRecordingId(null);
+    setOriginalText("");
+  };
+
+  const handleEdit = () => {
+    setOriginalText(transcript);
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setTranscript(originalText);
+    setIsEditing(false);
+    setOriginalText("");
+  };
+
+  const handleSave = async () => {
+    if (!recordingId) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/recordings/${recordingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: transcript }),
+      });
+      if (res.ok) {
+        setIsEditing(false);
+        setOriginalText("");
+      }
+    } catch {
+      // stay in edit mode on failure
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -152,7 +191,16 @@ export default function DashboardPage() {
 
         <div className="min-h-[100px] text-sm text-on-surface leading-relaxed">
           {transcript ? (
-            <p className="whitespace-pre-wrap">{transcript}</p>
+            isEditing ? (
+              <textarea
+                value={transcript}
+                onChange={(e) => setTranscript(e.target.value)}
+                className="w-full min-h-[100px] bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm text-on-surface leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-colors"
+                autoFocus
+              />
+            ) : (
+              <p className="whitespace-pre-wrap">{transcript}</p>
+            )
           ) : (
             <p className="text-on-surface-variant italic">
               Your transcription will appear here...
@@ -162,6 +210,34 @@ export default function DashboardPage() {
 
         <div className="flex justify-between items-center pt-3 mt-auto border-t border-outline-variant/50">
           <div className="flex gap-2">
+            {isEditing ? (
+              <>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-secondary text-white hover:bg-secondary/90 transition-colors text-xs disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : "Save"}
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={saving}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant text-xs disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              transcript && (
+                <button
+                  onClick={handleEdit}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-primary text-xs"
+                >
+                  <Pencil size={14} />
+                  Edit
+                </button>
+              )
+            )}
             <button
               onClick={handleCopy}
               disabled={!transcript}
