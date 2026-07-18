@@ -67,7 +67,7 @@ export default function Sidebar() {
       {/* Backdrop overlay */}
       <div
         onClick={close}
-        className={`fixed inset-0 bg-black/30 z-55 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-inverse-surface/30 z-55 transition-opacity duration-300 ${
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       />

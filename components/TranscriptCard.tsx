@@ -38,7 +38,7 @@ export default function TranscriptCard({
   const displayText = expanded || !isLong ? text : text.slice(0, 150) + "...";
 
   return (
-    <div className="bg-white rounded-xl border border-outline-variant p-4 flex flex-col gap-2 transition-shadow hover:shadow-md">
+    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-4 flex flex-col gap-2 transition-shadow hover:shadow-md">
       <p className="text-on-surface text-xs leading-relaxed whitespace-pre-wrap">
         {displayText}
       </p>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import ThemeToggle from "@/components/theme-toggle";
 
 export default function SettingsPage() {
   const [apiKey, setApiKey] = useState("");
@@ -68,7 +69,19 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-outline-variant p-4 space-y-5">
+      <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-4 space-y-5">
+        <div>
+          <h3 className="text-xs font-semibold text-on-surface mb-1">
+            Appearance
+          </h3>
+          <p className="text-[11px] text-on-surface-variant mb-2">
+            Choose your preferred color theme.
+          </p>
+          <ThemeToggle />
+        </div>
+
+        <div className="border-t border-outline-variant" />
+
         <div>
           <h3 className="text-xs font-semibold text-on-surface mb-1">
             Groq API Key
